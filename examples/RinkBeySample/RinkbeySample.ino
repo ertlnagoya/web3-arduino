@@ -6,6 +6,7 @@
 
 #define ENV_SSID     "ENV_SSID"
 #define ENV_WIFI_KEY "ENV_WIFI_KEY"
+#define my_address "MY_ADDRESS"
 string MY_ADDRESS = "MY_ADDRESS";   //#define MY_ADDRESS "MY_ADDRESS"
 #define contract_address "CONTRACT_ADDRESS"
 string CONTRACT_ADDRESS = "CONTRACT_ADDRESS";   //#define CONTRACT_ADDRESS "CONTRACT_ADDRESS"
@@ -65,7 +66,7 @@ void web3_example() {
 
 void eth_call_example() {
     Contract contract(&web3, &CONTRACT_ADDRESS);   // Contract contract(&web3, CONTRACT_ADDRESS);
-    strcpy(contract.options.from, MY_ADDRESS);
+    strcpy(contract.options.from, my_address);
     strcpy(contract.options.gasPrice,"2000000000000");
     contract.options.gas = 5000000;
     string func = "get()";
