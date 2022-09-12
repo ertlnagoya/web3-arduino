@@ -3,288 +3,239 @@
 //
 
 #include "Web3.h"
-#include <WiFiClientSecure.h>
-#include "CaCert.h"
-#include "Log.h"
-#include "Util.h"
-#include "cJSON/cJSON.h"
-#include <iostream>
-#include <sstream>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include <Arduino.h>
 
-WiFiClientSecure client;
-Log debug;
-#define LOG(x) debug.println(x)
+// TODO 初期化処理を挟む or httpclientに書き換える
+HTTPClient client;
+DynamicJsonDocument doc(2048);
 
-Web3::Web3(const string* _host, const string* _path) {
-    client.setCACert(infura_ca_cert);
+Web3::Web3(const String &_host, const String &_path)
+{
     host = _host;
     path = _path;
 }
 
-string Web3::Web3ClientVersion() {
-    string m = "web3_clientVersion";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getString(&output);
+// TODO: we need deconstrucotor for free DynamicJsonDocument
+
+String Web3::Web3ClientVersion()
+{
+    String m = "web3_clientVersion";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getString(output);
 }
 
-string Web3::Web3Sha3(const string* data) {
-    string m = "web3_sha3";
-    string p = "[\"" + *data + "\"]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getString(&output);
+String Web3::Web3Sha3(const String &data)
+{
+    String m = "web3_sha3";
+    String p = "[\"" + data + "\"]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getString(output);
 }
 
-int Web3::NetVersion() {
-    string m = "net_version";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getInt(&output);
+int Web3::NetVersion()
+{
+    String m = "net_version";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getInt(output);
 }
 
-bool Web3::NetListening() {
-    string m = "net_listening";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getBool(&output);
+bool Web3::NetListening()
+{
+    String m = "net_listening";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getBool(output);
 }
 
-int Web3::NetPeerCount() {
-    string m = "net_peerCount";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getInt(&output);
+long int Web3::NetPeerCount()
+{
+    String m = "net_peerCount";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getLongbyHex(output);
 }
 
-double Web3::EthProtocolVersion() {
-    string m = "eth_protocolVersion";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getDouble(&output);
+String Web3::EthProtocolVersion()
+{
+    String m = "eth_protocolVersion";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getString(output);
 }
 
-bool Web3::EthSyncing() {
-    string m = "eth_syncing";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string result = exec(&input);
-
-    cJSON *root, *value;
-    root = cJSON_Parse(result.c_str());
-    value = cJSON_GetObjectItem(root, "result");
-    bool ret;
-    if (cJSON_IsBool(value)) {
-        ret = false;
-    } else{
-        ret = true;
-    }
-    cJSON_free(root);
-    return ret;
+String Web3::EthSyncing()
+{
+    String m = "eth_syncing";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getString(output);
 }
 
-bool Web3::EthMining() {
-    string m = "eth_mining";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getBool(&output);
+bool Web3::EthMining()
+{
+    String m = "eth_mining";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getBool(output);
 }
 
-double Web3::EthHashrate() {
-    string m = "eth_hashrate";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getDouble(&output);
+double Web3::EthHashrate()
+{
+    String m = "eth_hashrate";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getDouble(output);
 }
 
-long long int Web3::EthGasPrice() {
-    string m = "eth_gasPrice";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getLongLong(&output);
+long long int Web3::EthGasPrice()
+{
+    String m = "eth_gasPrice";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getLLbyHex(output);
 }
 
-void Web3::EthAccounts(char** array, int size) {
-     // TODO
+void Web3::EthAccounts()
+{
+    // TODO
 }
 
-int Web3::EthBlockNumber() {
-    string m = "eth_blockNumber";
-    string p = "[]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getInt(&output);
+long int Web3::EthBlockNumber()
+{
+    String m = "eth_blockNumber";
+    String p = "[]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getLongbyHex(output);
 }
 
-long long int Web3::EthGetBalance(const string* address) {
-    string m = "eth_getBalance";
-    string p = "[\"" + *address + "\",\"latest\"]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getLongLong(&output);
+long long int Web3::EthGetBalance(const String &address)
+{
+    String m = "eth_getBalance";
+    String p = "[\"" + address + "\",\"latest\"]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getLLbyHex(output);
 }
 
-int Web3::EthGetTransactionCount(const string* address) {
-    string m = "eth_getTransactionCount";
-    string p = "[\"" + *address + "\",\"latest\"]";
-    string input = generateJson(&m, &p);
-    string output = exec(&input);
-    return getInt(&output);
+long int Web3::EthGetTransactionCount(const String &address)
+{
+    String m = "eth_getTransactionCount";
+    String p = "[\"" + address + "\",\"latest\"]";
+    String input = generateJson(m, p);
+    String output = exec(input);
+    return getLongbyHex(output);
 }
 
-string Web3::EthCall(const string* from, const string* to, long gas, long gasPrice,
-                     const string* value, const string* data) {
-    // TODO use gas, gasprice and value
-    string m = "eth_call";
-    string p = "[{\"from\":\"" + *from + "\",\"to\":\""
-               + *to + "\",\"data\":\"" + *data + "\"}, \"latest\"]";
-    string input = generateJson(&m, &p);
-    return exec(&input);
+String Web3::EthCall(const String &from, const String &to, const String &data)
+{
+    String m = "eth_call";
+    String p = "[{\"from\":\"" + from + "\",\"to\":\"" + to + "\",\"data\":\"" + data + "\"}, \"latest\"]";
+    String input = generateJson(m, p);
+    return exec(input);
 }
 
-string Web3::EthSendSignedTransaction(const string* data, const uint32_t dataLen) {
-    string m = "eth_sendRawTransaction";
-    string p = "[\"" + *data + "\"]";
-    string input = generateJson(&m, &p);
-#if 0
-    LOG(input);
-#endif
-    return exec(&input);
+String Web3::EthSendTransaction(const String &from, const String &to, const String &data)
+{
+    String m = "eth_sendTransaction";
+    String p = "[{\"from\":\"" + from + "\",\"to\":\"" + to + "\",\"data\":\"" + data + "\"}]";
+    String input = generateJson(m, p);
+    return exec(input);
+}
+
+String Web3::EthSendSignedTransaction(const String &data, const uint32_t dataLen)
+{
+    String m = "eth_sendRawTransaction";
+    String p = "[\"" + data + "\"]";
+    String input = generateJson(m, p);
+    return exec(input);
 }
 
 // -------------------------------
 // Private
 
-string Web3::generateJson(const string* method, const string* params) {
-    return "{\"jsonrpc\":\"2.0\",\"method\":\"" + *method + "\",\"params\":" + *params + ",\"id\":0}";
+String Web3::generateJson(const String &method, const String &params)
+{
+    return "{\"jsonrpc\":\"2.0\",\"method\":\"" + method + "\",\"params\":" + params + ",\"id\":0}";
 }
 
-string Web3::exec(const string* data) {
-    string result;
-
-    // start connection
-    LOG("\nStarting connection to server...");
-    int connected = client.connect(host->c_str(), 443);
-    if (!connected) {
-        return "";
+String Web3::exec(const String &data)
+{
+    if (client.begin(path) == false)
+    {
+        return "connection error";
     }
-
-    LOG("Connected to server!");
     // Make a HTTP request:
-    int l = data->size();
-    stringstream ss;
-    ss << l;
-    string lstr = ss.str();
 
-    string strPost = "POST " + *path + " HTTP/1.1";
-    string strHost = "Host: " + *host;
-    string strContentLen = "Content-Length: " + lstr;
+    client.addHeader("Content-Type", "application/json");
+    client.addHeader("Connection", "close");
+    int status = client.POST(data);
 
-    client.println(strPost.c_str());
-    client.println(strHost.c_str());
-    client.println("Content-Type: application/json");
-    client.println(strContentLen.c_str());
-    client.println("Connection: close");
-    client.println();
-    client.println(data->c_str());
-
-    while (client.connected()) {
-        String line = client.readStringUntil('\n');
-        LOG(line.c_str());
-        if (line == "\r") {
-            break;
-        }
+    if (status < 0)
+    {
+        return client.errorToString(status).c_str();
     }
-    // if there are incoming bytes available
-    // from the server, read them and print them:
-    while (client.available()) {
-        char c = client.read();
-        result += c;
-    }
-    LOG(result.c_str());
-
-    client.stop();
-
-    return result;
+    return client.getString();
 }
 
-int Web3::getInt(const string* json) {
-    int ret = -1;
-    cJSON *root, *value;
-    root = cJSON_Parse(json->c_str());
-    value = cJSON_GetObjectItem(root, "result");
-    if (cJSON_IsString(value)) {
-        ret = strtol(value->valuestring, nullptr, 16);
-    }
-    cJSON_free(root);
-    return ret;
+int Web3::getInt(const String &json)
+{
+    deserializeJson(doc, json);
+    int value = doc["result"].as<signed int>();
+    doc.clear();
+    return value;
 }
 
-long Web3::getLong(const string* json) {
-    long ret = -1;
-    cJSON *root, *value;
-    root = cJSON_Parse(json->c_str());
-    value = cJSON_GetObjectItem(root, "result");
-    if (cJSON_IsString(value)) {
-        ret = strtol(value->valuestring, nullptr, 16);
-    }
-    cJSON_free(root);
-    return ret;
+long int Web3::getLongbyHex(const String &json)
+{
+    deserializeJson(doc, json);
+    const char *value = doc["result"].as<const char *>();
+    doc.clear();
+    return strtol(value, NULL, 0);
 }
 
-long long int Web3::getLongLong(const string* json) {
-    long long int ret = -1;
-    cJSON *root, *value;
-    root = cJSON_Parse(json->c_str());
-    value = cJSON_GetObjectItem(root, "result");
-    if (cJSON_IsString(value)) {
-        ret = strtoll(value->valuestring, nullptr, 16);
-    }
-    cJSON_free(root);
-    return ret;
+long long int Web3::getLLbyHex(const String &json)
+{
+    deserializeJson(doc, json);
+    const char *value = doc["result"].as<const char *>();
+    doc.clear();
+    return strtoll(value, NULL, 0);
 }
 
-double Web3::getDouble(const string* json) {
-    double ret = -1;
-    cJSON *root, *value;
-    root = cJSON_Parse(json->c_str());
-    value = cJSON_GetObjectItem(root, "result");
-    if (cJSON_IsString(value)) {
-        LOG(value->valuestring);
-        ret = strtof(value->valuestring, nullptr);
-    }
-    cJSON_free(root);
-    return ret;
+double Web3::getDouble(const String &json)
+{
+    deserializeJson(doc, json);
+    double value = doc["result"].as<double>();
+    doc.clear();
+    return value;
 }
 
-bool Web3::getBool(const string* json) {
-    bool ret = false;
-    cJSON *root, *value;
-    root = cJSON_Parse(json->c_str());
-    value = cJSON_GetObjectItem(root, "result");
-    if (cJSON_IsBool(value)) {
-        ret = (bool)value->valueint;
-    }
-    cJSON_free(root);
-    return ret;
+bool Web3::getBool(const String &json)
+{
+    deserializeJson(doc, json);
+    bool value = doc["result"].as<bool>();
+    doc.clear();
+    return value;
 }
 
-string Web3::getString(const string* json) {
-    cJSON *root, *value;
-    root = cJSON_Parse(json->c_str());
-    value = cJSON_GetObjectItem(root, "result");
-    if (cJSON_IsString(value)) {
-        cJSON_free(root);
-        return string(value->valuestring);
-    }
-    cJSON_free(root);
-    return nullptr;
+String Web3::getString(const String &json)
+{
+    deserializeJson(doc, json);
+    String value = doc["result"].as<String>();
+    doc.clear();
+    return value;
 }
