@@ -1,33 +1,30 @@
-## unmaintained
-
-Sorry but I cannot take time to maintain the library now...
-
 ## web3-arduino
 
 ![img](https://user-images.githubusercontent.com/891384/36104056-4994f600-1054-11e8-94f4-9f067610a6bf.png)
 
 - What is this library?
-    - This is an Arduino (or ESP32) library to use web3 on Ethereum platform.
 
-- What is Arduino? 
-    - Arduino is an open source computer hardware and software.
-    - https://www.arduino.cc/
+  - This is an Arduino (or ESP32) library to use web3 on Ethereum platform.
+
+- What is Arduino?
+  - Arduino is an open source computer hardware and software.
+  - https://www.arduino.cc/
 - What is ESP32?
-    - ESP32 is a series of low cost, low power system on a chip microcontrollers with integrated Wi-Fi and dual-mode Bluetooth. 
-    - https://www.espressif.com/en/products/hardware/esp32/overview    
+  - ESP32 is a series of low cost, low power system on a chip microcontrollers with integrated Wi-Fi and dual-mode Bluetooth.
+  - https://www.espressif.com/en/products/hardware/esp32/overview
 - What is web3?
-    - Web3 is the Ethereum compatible API which implements the Generic JSON RPC spec. Originally Javascript version is developed.
-    - https://github.com/ethereum/web3.js/
+  - Web3 is the Ethereum compatible API which implements the Generic JSON RPC spec. Originally Javascript version is developed.
+  - https://github.com/ethereum/web3.js/
 - What is Ethereum?
-    - Ethereum is a decentralized platform for applications that run exactly as programmed without any chance of fraud, censorship or third-party interference.
-    - https://www.ethereum.org/
-    
+  - Ethereum is a decentralized platform for applications that run exactly as programmed without any chance of fraud, censorship or third-party interference.
+  - https://www.ethereum.org/
+
 ## Environment
 
 - Confirmed device
-    - ESP-WROOM-32
+  - ESP-WROOM-32
 - Used Ethereum client
-    - INFURA (https://infura.io)
+  - localhost (hardhat)
 
 ## Installation
 
@@ -43,59 +40,51 @@ Please refer `examples` directory.
 ### setup
 
 ```C++
-#define INFURA_HOST "rinkeby.infura.io"
-#define INFURA_PATH "/<YOUR_INFURA_ID>"
+String account = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+String contract_address = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
-Web3 web3(INFURA_HOST, INFURA_PATH);
+Web3 web3("localhost", "http://192.168.0.9:8545/");
 ```
 
 ### call web3 methods
 
 ```C++
-char result[128];
-
-web3.Web3ClientVersion(result);
-USE_SERIAL.println(result);
-
-web3.Web3Sha3("0x68656c6c6f20776f726c64", result);
-USE_SERIAL.println(result);
+Serial.println(web3.Web3ClientVersion());
+Serial.println(web3.Web3Sha3("0x68656c6c6f20776f726c64"));
+Serial.println(web3.NetVersion());
+Serial.println(web3.NetListening());
+Serial.println(web3.NetPeerCount());
+Serial.println(web3.EthProtocolVersion());
+Serial.println(web3.EthSyncing());
+Serial.println(web3.EthMining());
+Serial.println(web3.EthGasPrice());
+Serial.println(web3.EthBlockNumber());
+Serial.println(web3.EthGetBalance(account));
+Serial.println(web3.EthGetTransactionCount(account));
 ```
 
 ### `call` to Contract
 
 ```C++
-Contract contract(&web3, CONTRACT_ADDRESS);
-strcpy(contract.options.from, MY_ADDRESS);
-strcpy(contract.options.gasPrice,"2000000000000");
-contract.options.gas = 5000000;
-contract.SetupContractData(result, "get()");
-contract.Call(result);
-USE_SERIAL.println(result);
+Contract contract(&web3, contract_address);
+contract.SetPrivateKey(PRIVATE_KEY);
+contract.SetAccount(account);
 ```
 
 ### `sendTransaction` to Contract
 
 ```C++
-Contract contract(&web3, CONTRACT_ADDRESS);
-contract.SetPrivateKey((uint8_t*)PRIVATE_KEY);
-uint32_t nonceVal = (uint32_t)web3.EthGetTransactionCount((char *)MY_ADDRESS);
+String retrieve_code = contract.SetupContractData("f", "retrieve()");
+Serial.println(contract.Call(retrieve_code));
 
-uint32_t gasPriceVal = 141006540;
-uint32_t  gasLimitVal = 3000000;
-uint8_t toStr[] = CONTRACT_ADDRESS;
-uint8_t valueStr[] = "0x00";
-uint8_t dataStr[100];
-memset(dataStr, 0, 100);
-contract.SetupContractData((char*)dataStr, "set(uint256)", 123);
-contract.SendTransaction((uint8_t *) result,
-                         nonceVal, gasPriceVal, gasLimitVal, toStr, valueStr, dataStr);
+String store_code = contract.SetupContractData("fu", "store(uint256)", 123);
+Serial.println(contract.SendTransaction(store_code));
 
-USE_SERIAL.println(result);
+Serial.println(contract.Call(retrieve_code));
 ```
 
 ## Dependency
 
-- [cJSON](https://github.com/DaveGamble/cJSON)
-- [secp256k1](https://github.com/bitcoin-core/secp256k1)
+- [ArduinoJson] (https://arduinojson.org/)
+- [HTTPClient] (https://www.arduino.cc/reference/en/libraries/httpclient/)
 - [ESP32-Arduino](https://github.com/espressif/arduino-esp32)
-

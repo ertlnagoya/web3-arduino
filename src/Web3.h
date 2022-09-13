@@ -5,47 +5,45 @@
 #ifndef ARDUINO_WEB3_WEB3_H
 #define ARDUINO_WEB3_WEB3_H
 
-#include "stdint.h"
-#include <string>
+#include <Arduino.h>
 
 using namespace std;
 
-class Web3 {
+class Web3
+{
 public:
-    Web3(const string* _host, const string* _path);
-    string Web3ClientVersion();
-    string Web3Sha3(const string* data);
+    Web3(const String &_host, const String &_path);
+    String Web3ClientVersion();
+    String Web3Sha3(const String &data);
     int NetVersion();
     bool NetListening();
-    int NetPeerCount();
-    double EthProtocolVersion();
-    bool EthSyncing();
+    long int NetPeerCount();
+    String EthProtocolVersion();
+    String EthSyncing();
     bool EthMining();
     double EthHashrate();
     long long int EthGasPrice();
-    void EthAccounts(char** array, int size);
-    int EthBlockNumber();
-    long long int EthGetBalance(const string* address);
-    int EthGetTransactionCount(const string* address);
-
-    string EthCall(const string* from, const string* to, long gas, long gasPrice, const string* value, const string* data);
-    string EthSendSignedTransaction(const string* data, const uint32_t dataLen);
-
-private:
-    string exec(const string* data);
-    string generateJson(const string* method, const string* params);
-    int getInt(const string* json);
-    long getLong(const string* json);
-    long long int getLongLong(const string* json);
-    double getDouble(const string* json);
-    bool getBool(const string* json);
-    string getString(const string* json);
+    void EthAccounts();
+    long int EthBlockNumber();
+    long long int EthGetBalance(const String &address);
+    long int EthGetTransactionCount(const String &address);
+    String EthCall(const String &from, const String &to, const String &data);
+    String EthSendTransaction(const String &from, const String &to, const String &data);
+    String EthSendSignedTransaction(const String &data, const uint32_t dataLen);
 
 private:
-    const string* host;
-    const string* path;
+    String exec(const String &data);
+    String generateJson(const String &method, const String &params);
+    int getInt(const String &json);
+    long int getLongbyHex(const String &json);
+    long long int getLLbyHex(const String &json);
+    double getDouble(const String &json);
+    bool getBool(const String &json);
+    String getString(const String &json);
 
-
+private:
+    String host;
+    String path;
 };
 
-#endif //ARDUINO_WEB3_WEB3_H
+#endif // ARDUINO_WEB3_WEB3_H
